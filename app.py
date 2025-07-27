@@ -5,6 +5,7 @@ import json
 import time 
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 RAG_BACKEND_URL = os.getenv('RAG_BACKEND_URL')
@@ -46,7 +47,14 @@ if prompt := st.chat_input("Hi! How may i help you? "):
         st.markdown(prompt)
 
 
-    payload = {"query": prompt}
+    index_name = st.sidebar.text_input("Pinecone Index Name", value="rag")
+    top_k = st.sidebar.slider("Top K Results", 1, 20, 5)
+
+    payload = {
+        "query": prompt,
+        "top_k": top_k,
+        "pinecone_index_name": index_name
+        }
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):

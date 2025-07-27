@@ -95,17 +95,26 @@ async def upload_and_process_docx(file: UploadFile = File(...), index_name: Opti
 @app.post("/ask_document/")
 async def ask_document(query_data: QueryModel):
     """
-    Answers a query using the processed document content, either from in-memory or Pinecone.
+    Answers a query using either in-memory document content or a Pinecone index.
     """
+    # Initialize model if not yet done
     if not rag_pipeline_state['embeddings_model']:
-        raise HTTPException(status_code=400, detail="No document processed yet. Please upload a DOCX first.")
+        embeddings_model = initialize_embeddings('multilingual-e5-large')
+        if not embeddings_model:
+            raise HTTPException(status_code=500, detail="Failed to initialize embeddings model.")
+        rag_pipeline_state['embeddings_model'] = embeddings_model
+
+    # Use the index if provided
+    pinecone_index = rag_pipeline_state.get('pinecone_index_name') or query_data.pinecone_index_name
+    if not pinecone_index and not rag_pipeline_state.get('chunks'):
+        raise HTTPException(status_code=400, detail="No document in memory or Pinecone index provided.")
 
     llm_response = ask_llm_with_context(
         query_data.query,
         rag_pipeline_state['embeddings_model'],
-        rag_pipeline_state['chunks'],
-        rag_pipeline_state['embeddings'],
-        pinecone_index_name=rag_pipeline_state['pinecone_index_name'],
+        rag_pipeline_state.get('chunks'),
+        rag_pipeline_state.get('embeddings'),
+        pinecone_index_name=pinecone_index,
         top_k=query_data.top_k
     )
     return {"answer": llm_response}
