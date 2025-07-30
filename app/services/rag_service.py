@@ -85,9 +85,7 @@ def ask_llm_with_context(query, embeddings_model, chunks, embeddings_list, pinec
     context = "\n\n".join(context_texts)
 
     llm_prompt = f"""
-You are an AI assistant tasked with answering questions based *only* on the provided context.
-If the answer cannot be found in the context, please state that you don't have enough information
-and avoid making up answers.
+    You are an AI assistant tasked with answering questions based on the provided context.
 
 Context:
 ---
@@ -98,8 +96,8 @@ Question: {query}
 
 Answer:
 """
-    print("\n--- Sending prompt to LLM ---")
-    print(f"Prompt preview:\n{llm_prompt[:50]}...\n[Full prompt length: {len(llm_prompt)} characters]")
+    #print("\n--- Sending prompt to LLM ---")
+    #print(f"Prompt preview:\n{llm_prompt[:50]}...\n[Full prompt length: {len(llm_prompt)} characters]")
 
     llm_response = call_ollama_llm(llm_prompt)
 
