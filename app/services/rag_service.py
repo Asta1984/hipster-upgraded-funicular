@@ -18,10 +18,14 @@ def call_ollama_llm(prompt, ollama_url=os.getenv('OLLAMA_BASE_URL'), model="tiny
     api_endpoint = f"{ollama_url}/api/generate"
     headers = {"Content-Type": "application/json"}
     data = {
-        "model": model,
-        "prompt": prompt,
-        "stream": True
+    "model": model,
+    "prompt": prompt,
+    "stream": True,
+    "options": {
+        "num_predict": 150,  # Limit response to ~150 tokens
+        "temperature": 0.3  # Lower temperature for more focused responses
     }
+}
 
     print(f"Calling Ollama LLM ({model})...")
     full_response_content = ""

@@ -3,6 +3,8 @@ from langchain_text_splitters import NLTKTextSplitter
 from docx import Document
 from io import BytesIO
 import os
+import re
+
 
 def setup_nltk_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -45,6 +47,23 @@ def extract_text_from_docx(file_content: bytes):
         print(f"Error reading DOCX: {e}")
         return None
 
+def extract_text_from_markdown(file_content: bytes):
+    """Extract plain text from Markdown file, removing formatting."""
+    try:
+        text = file_content.decode('utf-8')
+        
+        # Remove markdown formatting (basic patterns)
+        text = re.sub(r'#+\s*', '', text)  # Headers
+        text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # Bold
+        text = re.sub(r'\*(.*?)\*', r'\1', text)  # Italic
+        text = re.sub(r'`(.*?)`', r'\1', text)  # Inline code
+        text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)  # Links
+        
+        return text
+    except Exception as e:
+        print(f"Error reading Markdown: {e}")
+        return None
+    
 def chunk_text_nltk(text, chunk_size=200, chunk_overlap=20):
     """Chunk text using NLTK splitter"""
     splitter = NLTKTextSplitter(
